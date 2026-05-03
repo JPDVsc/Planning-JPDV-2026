@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Planning 2026 + Export CSV</title>
+    <title>Planning 2026</title>
     <script src="https://cloudflare.com"></script>
     <script src="https://cloudflare.com"></script>
     <script src="https://cloudflare.com"></script>
@@ -13,7 +13,6 @@
         .container { max-width: 1000px; margin: 0 auto; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
         .btn-export { background: #48bb78; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-export:hover { background: #38a169; }
         table { width: 100%; border-collapse: collapse; background: #1a1f2e; border-radius: 8px; overflow: hidden; }
         th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2d3748; }
         th { background: #252d3d; font-size: 12px; color: #a0aec0; }
@@ -27,7 +26,6 @@
     <div id="root"></div>
     <script type="text/babel">
         const { useState, useEffect } = React;
-
         const MONTHS = [
             { name: "Janvier", days: 31, startDay: 4 }, { name: "Février", days: 28, startDay: 0 },
             { name: "Mars", days: 31, startDay: 0 }, { name: "Avril", days: 30, startDay: 3 },
@@ -37,41 +35,34 @@
             { name: "Novembre", days: 30, startDay: 0 }, { name: "Décembre", days: 31, startDay: 2 }
         ];
         const JOURS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-
         function timeToMinutes(t) {
             if (!t || !t.includes(':')) return 0;
             const [h, m] = t.split(":").map(Number);
             return (h * 60) + (m || 0);
         }
-
         function minutesToTime(mins) {
             if (mins <= 0) return "-";
             const h = Math.floor(mins / 60);
             const m = mins % 60;
             return `${h}h${String(m).padStart(2, "0")}`;
         }
-
         function App() {
             const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
             const [data, setData] = useState(() => {
                 const saved = localStorage.getItem("planning_2026_v2");
                 return saved ? JSON.parse(saved) : MONTHS.map(m => Array(m.days).fill({ mArr: "", mDep: "", aArr: "", aDep: "" }));
             });
-
             useEffect(() => { localStorage.setItem("planning_2026_v2", JSON.stringify(data)); }, [data]);
-
             const handleChange = (dayIdx, field, val) => {
                 const newData = [...data];
                 newData[currentMonth][dayIdx] = { ...newData[currentMonth][dayIdx], [field]: val };
                 setData(newData);
             };
-
             const calculateDayTotal = (day) => {
                 const m = Math.max(0, timeToMinutes(day.mDep) - timeToMinutes(day.mArr));
                 const a = Math.max(0, timeToMinutes(day.aDep) - timeToMinutes(day.aArr));
                 return m + a;
             };
-
             const exportToCSV = () => {
                 let csv = "Mois;Jour;Matin Arrivee;Matin Depart;Aprem Arrivee;Aprem Depart;Total\n";
                 data.forEach((monthDays, mIdx) => {
@@ -90,9 +81,7 @@
                 link.click();
                 document.body.removeChild(link);
             };
-
             const monthTotal = data[currentMonth].reduce((acc, day) => acc + calculateDayTotal(day), 0);
-
             return (
                 <div className="container">
                     <div className="nav-bar">
@@ -105,9 +94,7 @@
                     </div>
                     <table>
                         <thead>
-                            <tr>
-                                <th>Jour</th><th>Matin Arr</th><th>Matin Dep</th><th>Aprem Arr</th><th>Aprem Dep</th><th>Total</th>
-                            </tr>
+                            <tr><th>Jour</th><th>Matin Arr</th><th>Matin Dep</th><th>Aprem Arr</th><th>Aprem Dep</th><th>Total</th></tr>
                         </thead>
                         <tbody>
                             {data[currentMonth].map((day, i) => {
@@ -128,8 +115,8 @@
                 </div>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
+</html>
